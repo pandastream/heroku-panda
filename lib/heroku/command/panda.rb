@@ -22,11 +22,15 @@ module Heroku::Command
       }
       
       @config = {
-        "access_key"  =>  @panda_vars["PANDASTREAM_ACCESS_KEY"], 
-        "secret_key"  =>  @panda_vars["PANDASTREAM_SECRET_KEY"], 
+        "access_key"  =>  @panda_vars["PANDASTREAM_ACCESS_KEY"],
+        "secret_key"  =>  @panda_vars["PANDASTREAM_SECRET_KEY"],
         "cloud_id"    =>  @panda_vars["PANDASTREAM_CLOUD_ID"]
       }
 
+      @config["api_host"] = @panda_vars["PANDASTREAM_API_HOST"] if @panda_vars["PANDASTREAM_API_HOST"]
+      @config["api_port"] = @panda_vars["PANDASTREAM_API_PORT"] if @panda_vars["PANDASTREAM_API_PORT"]
+      
+      
       print_error("S3_BUCKET is empty")     if @panda_bucket.to_s.empty?
       print_error("S3_KEY is empty")     if @panda_key.to_s.empty?
       print_error("S3_SECRET is empty")  if @panda_secret.to_s.empty?
@@ -44,7 +48,13 @@ module Heroku::Command
       end
 
       panda = PandaGem.new(@config)
-      panda.setup_bucket(@bucket_config)
+      response = JSON.parse(panda.setup_bucket(@bucket_config))
+      
+      if response['error']
+        print_error(response["message"]) 
+        return false
+      end
+      
     end
     
   private
