@@ -4,6 +4,12 @@ begin
 rescue LoadError
   abort "Error:: Install the Panda gem to use panda commands:\nsudo gem install panda"
 end
+
+begin
+  require 'json'
+rescue LoadError
+  abort "Error:: Install the json gem to use panda commands:\nsudo gem install json"
+end
   
 module Heroku::Command
   class Panda < BaseWithApp
@@ -37,6 +43,7 @@ module Heroku::Command
 
       if @will_abort
         print "\n"
+        print "Operation aborted\n"
         print "Usage:: \n"
         print "\theroku addons:add panda (This will set all PANDASTREAM_* Heroku config vars)\n"
         print "\theroku panda:setup_bucket $S3_BUCKET ($S3_KEY $S3_SECRET)\n"
@@ -44,7 +51,19 @@ module Heroku::Command
       end
 
       panda = PandaGem.new(@config)
-      panda.setup_bucket(@bucket_config)
+      begin
+        result = JSON.parse(panda.setup_bucket(@bucket_config))
+      rescue RestClient::RequestFailed
+        return "Error:: Panda is not accessible. Try again later."
+      end
+      
+      if result["id"]
+        return "Successfull:: The bucket permission is setup correctly."
+      elsif result["error"]
+        return "Failed:: #{result["message"]}"
+      else  
+        raise "Something is wrong"
+      end
     end
     
   private
