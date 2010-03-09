@@ -46,11 +46,7 @@ module Heroku::Command
       end
 
       if @will_abort
-        print "\n"
-        print "Operation aborted\n"
-        print "Usage:: \n"
-        print "\theroku addons:add panda (This will set all PANDASTREAM_* Heroku config vars)\n"
-        print "\theroku panda:setup_bucket $S3_BUCKET ($S3_KEY $S3_SECRET)\n"
+        print_abort_message
         return false
       end
 
@@ -58,23 +54,39 @@ module Heroku::Command
       begin
         result = JSON.parse(panda.setup_bucket(@bucket_config))
       rescue RestClient::RequestFailed
-        return "Error:: Panda is not accessible. Try again later."
+        print_message "Error:: Panda is not accessible. Try again later.\n"
+        return false
       end
       
       if result["id"]
-        return "Successfull:: The bucket permission is setup correctly."
+        print_message "Successfull:: The bucket permission is setup correctly.\n"
+        return true
       elsif result["error"]
-        return "Failed:: #{result["message"]}"
+        print_message "Failed:: #{result["message"]}\n"
+        return false
       else  
         raise "Something is wrong"
       end
     end
     
   private
+    def print_message(msg)
+      print msg
+    end
+    
+    def print_abort_message
+      print "\n"
+      print "Operation aborted\n"
+      print "Usage:: \n"
+      print "\theroku addons:add panda (This will set all PANDASTREAM_* Heroku config vars)\n"
+      print "\theroku panda:setup_bucket $S3_BUCKET ($S3_KEY $S3_SECRET)\n"
+    end
+
     def print_error(msg)
       @will_abort = true
-      print "Error:: #{msg} \n"
+      print_message "Error:: #{msg} \n"
     end
+    
     
   end
 end

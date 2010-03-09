@@ -35,7 +35,8 @@ describe Heroku::Command::Panda do
         "secret_key"  =>  "PANDA_SECRET",
         "cloud_id"    =>  "PANDA_CLOUD"
       ).and_return(panda_gem)
-
+      
+      panda.stub!(:print_message)
       panda.setup_bucket.should be_true
     end
 
@@ -49,6 +50,7 @@ describe Heroku::Command::Panda do
         with(:bucket => "bucket" , :access_key => @config_vars["S3_KEY"], :secret_key =>  @config_vars["S3_SECRET"]).and_return(@message)
       PandaGem.should_receive(:new).and_return(panda_gem)
 
+      panda.stub!(:print_message)
       panda.setup_bucket.should be_true
     end
 
@@ -56,6 +58,8 @@ describe Heroku::Command::Panda do
       panda = Heroku::Command::Panda.new(["--app", "myapp"])
       panda.stub!(:app).and_return("myapp")
       panda.stub!(:heroku).and_return(mock('heroku client', :config_vars => {}))
+      panda.should_receive(:print_message).with(/empty/).at_least(1)
+      panda.should_receive(:print_abort_message)
       panda.setup_bucket.should be_false
     end
 
@@ -63,6 +67,8 @@ describe Heroku::Command::Panda do
       panda = Heroku::Command::Panda.new(["bucket", "--app", "myapp"])
       panda.stub!(:app).and_return("myapp")
       panda.stub!(:heroku).and_return(mock('heroku client', :config_vars => {}))
+      panda.should_receive(:print_message).with(/empty/).at_least(1)
+      panda.should_receive(:print_abort_message)
       panda.setup_bucket.should be_false
     end
 
@@ -70,6 +76,8 @@ describe Heroku::Command::Panda do
       panda = Heroku::Command::Panda.new(["bucket", "key", "secret", "--app", "myapp"])
       panda.stub!(:app).and_return("myapp")
       panda.stub!(:heroku).and_return(mock('heroku client', :config_vars => {}))
+      panda.should_receive(:print_message).with(/empty/).at_least(1)
+      panda.should_receive(:print_abort_message)
       panda.setup_bucket.should be_false
     end
   end
@@ -86,7 +94,8 @@ describe Heroku::Command::Panda do
     it "should return successful message" do
       @panda_gem.should_receive(:setup_bucket).and_return(@message)
       PandaGem.should_receive(:new).and_return(@panda_gem)
-      @panda.setup_bucket.should == "Successfull:: The bucket permission is setup correctly."
+      @panda.should_receive(:print_message).with("Successfull:: The bucket permission is setup correctly.\n")
+      @panda.setup_bucket.should be_true
     end
     
     it "should return error message if S3 access is failed" do
@@ -94,13 +103,15 @@ describe Heroku::Command::Panda do
 
       @panda_gem.should_receive(:setup_bucket).and_return(error_message)
       PandaGem.should_receive(:new).and_return(@panda_gem)
-      @panda.setup_bucket.should == "Failed:: The bucket is not found"
+      @panda.should_receive(:print_message).with("Failed:: The bucket is not found\n")
+      @panda.setup_bucket.should be_false
     end
 
     it "should return error message if Panda is not accessible" do
       @panda_gem.should_receive(:setup_bucket).and_raise(RestClient::RequestFailed)
       PandaGem.should_receive(:new).and_return(@panda_gem)
-      @panda.setup_bucket.should == "Error:: Panda is not accessible. Try again later."
+      @panda.should_receive(:print_message).with("Error:: Panda is not accessible. Try again later.\n")
+      @panda.setup_bucket.should be_false
     end
   end
  end
