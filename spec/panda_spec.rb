@@ -10,10 +10,9 @@ describe Heroku::Command::Panda do
   before do
     @config_vars = {
       "S3_KEY" => 'KEY', "S3_SECRET" => "SECRET",
-      "PANDASTREAM_ACCESS_KEY" => "PANDA_ACCESS",
-      "PANDASTREAM_SECRET_KEY" => "PANDA_SECRET",
-      "PANDASTREAM_CLOUD_ID"   => "PANDA_CLOUD"
+      "PANDASTREAM_URL" => "PANDA_ACCESS:PANDA_SECRET@PANDA_API_HOST:PANDA_API_PORT/PANDA_CLOUD",
     }
+    
     @message = JSON.generate({"id" => "cloud_id", "account_id" => "account_id"})
   end
   
@@ -30,11 +29,7 @@ describe Heroku::Command::Panda do
 
       panda_gem = mock(PandaGem, :setup_bucket => true)
       panda_gem.should_receive(:setup_bucket).with(:bucket => "bucket" , :access_key => "key", :secret_key => "secret").and_return(@message)
-      PandaGem.should_receive(:new).with(
-        "access_key"  =>  "PANDA_ACCESS", 
-        "secret_key"  =>  "PANDA_SECRET",
-        "cloud_id"    =>  "PANDA_CLOUD"
-      ).and_return(panda_gem)
+      PandaGem.should_receive(:new).with("PANDA_ACCESS:PANDA_SECRET@PANDA_API_HOST:PANDA_API_PORT/PANDA_CLOUD").and_return(panda_gem)
       
       panda.stub!(:print_message)
       panda.setup_bucket.should be_true
