@@ -50,9 +50,9 @@ module Heroku::Command
         return false
       end
 
-      panda = PandaGem.new(@config)
+      PandaGem.connect!(@config)
       begin
-        result = JSON.parse(panda.setup_bucket(@bucket_config))
+        result = JSON.parse(PandaGem.setup_bucket(@bucket_config))
       rescue RestClient::RequestFailed
         print_message "Error:: Panda is not accessible. Try again later.\n"
         return false
