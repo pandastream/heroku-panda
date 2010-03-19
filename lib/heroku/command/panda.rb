@@ -27,30 +27,21 @@ module Heroku::Command
        :bucket => @panda_bucket , :access_key => @panda_key, :secret_key => @panda_secret
       }
       
-      @config = {
-        "access_key"  =>  @panda_vars["PANDASTREAM_ACCESS_KEY"],
-        "secret_key"  =>  @panda_vars["PANDASTREAM_SECRET_KEY"],
-        "cloud_id"    =>  @panda_vars["PANDASTREAM_CLOUD_ID"]
-      }
+      panda_url = @panda_vars["PANDASTREAM_URL"]
 
-      @config["api_host"] = @panda_vars["PANDASTREAM_API_HOST"] if @panda_vars["PANDASTREAM_API_HOST"]
-      @config["api_port"] = @panda_vars["PANDASTREAM_API_PORT"] if @panda_vars["PANDASTREAM_API_PORT"]
+      print_error("S3_BUCKET is empty")   if @panda_bucket.to_s.empty?
+      print_error("S3_KEY is empty")      if @panda_key.to_s.empty?
+      print_error("S3_SECRET is empty")   if @panda_secret.to_s.empty?
       
+      print_error("PANDASTREAM_URL var is empty") if panda_url.to_s.empty?
       
-      print_error("S3_BUCKET is empty")     if @panda_bucket.to_s.empty?
-      print_error("S3_KEY is empty")     if @panda_key.to_s.empty?
-      print_error("S3_SECRET is empty")  if @panda_secret.to_s.empty?
-      
-      @config.each do |key, val|
-        print_error("PANDASTREAM_#{key.upcase} Heroku config var is empty") if val.to_s.empty?
-      end
 
       if @will_abort
         print_abort_message
         return false
       end
 
-      PandaGem.connect!(@config)
+      PandaGem.connect!(panda_url)
       begin
         result = JSON.parse(PandaGem.setup_bucket(@bucket_config))
       rescue RestClient::RequestFailed
