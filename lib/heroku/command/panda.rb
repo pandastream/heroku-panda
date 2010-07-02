@@ -43,7 +43,8 @@ module Heroku::Command
 
       PandaGem.connect!(panda_url)
       begin
-        result = JSON.parse(PandaGem.setup_bucket(@bucket_config))
+        result = PandaGem.setup_bucket(@bucket_config)
+        result = JSON.parse(result) if result.is_a?(String)
       rescue RestClient::RequestFailed
         print_message "Error:: Panda is not accessible. Try again later.\n"
         return false
