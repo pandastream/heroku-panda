@@ -1,6 +1,6 @@
 desc 'Run specs'
 task :spec do
-  sh 'bacon -s spec/*_spec.rb'
+  sh 'spec spec/*_spec.rb --color'
 end
 task :default => :spec
 

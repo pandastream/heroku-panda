@@ -5,12 +5,6 @@ rescue LoadError
   abort "Error:: Install the Panda gem to use panda commands:\nsudo gem install panda"
 end
 
-begin
-  require 'json'
-rescue LoadError
-  abort "Error:: Install the json gem to use panda commands:\nsudo gem install json"
-end
-  
 module Heroku::Command
   class Panda < BaseWithApp
     def initialize(*args)
