@@ -35,7 +35,7 @@ module Heroku::Command
         return false
       end
 
-      PandaGem.connect!(panda_url)
+      PandaGem.configure(panda_url)
       begin
         result = PandaGem.setup_bucket(@bucket_config)
         result = JSON.parse(result) if result.is_a?(String)
