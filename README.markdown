@@ -5,7 +5,7 @@ This is a plugin for the Heroku command line, adding commands to grant S3 bucket
 
 ## Installation
 
-    $ heroku plugins:install http://github.com/newbamboo/heroku-panda.git
+    $ heroku plugins:install git://github.com/newbamboo/heroku-panda.git
 
 ## Config
 
